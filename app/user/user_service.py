@@ -84,9 +84,6 @@ class UserService:
         user: Optional[User] = self.repo.get_user_by_email(update_data.email)
         if not user:
             raise ValueError("User not Found.")
-        updated_user: User = User(
-            email=user.email,
-            password=update_data.new_password,
-            username=user.username
-        )
-        return self.repo.save_user(updated_user)
+        
+        user.password = update_data.new_password
+        return self.repo.save_user(user)
