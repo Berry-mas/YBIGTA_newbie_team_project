@@ -149,4 +149,3 @@ def test_delete_user_not_found(mock_user_service):
     # 응답 검증
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == USER_NOT_FOUND

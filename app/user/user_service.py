@@ -87,5 +87,3 @@ class UserService:
         
         user.password = update_data.new_password
         return self.repo.save_user(user)
-
-       

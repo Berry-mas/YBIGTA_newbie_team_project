@@ -18,4 +18,3 @@ class UserDeleteRequest(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
-

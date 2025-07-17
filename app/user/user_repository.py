@@ -8,7 +8,7 @@ from app.config import USER_DATA
 class UserRepository:
     def __init__(self) -> None:
         self.users: Dict[str, dict] = self._load_users()
-    
+
     def _load_users(self) -> Dict[str, Dict]:
         try:
             with open(USER_DATA, "r") as f:
