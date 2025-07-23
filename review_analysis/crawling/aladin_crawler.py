@@ -1,6 +1,8 @@
 import time
 import os
 import pandas as pd
+from typing import List, Dict, Union
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -17,8 +19,8 @@ class AladinCrawler(BaseCrawler):
         super().__init__(output_dir)
         self.base_url = 'https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=40869703'
         self.driver = None
-        self.reviews = []
-        self.min_reviews = 600
+        self.reviews: List[Dict[str, Union[str, int]]] = []  
+        self.min_reviews = 10
         self.output_dir = output_dir
 
     def start_browser(self):
