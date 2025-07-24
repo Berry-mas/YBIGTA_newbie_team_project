@@ -100,4 +100,5 @@ class yes24Crawler(BaseCrawler):
         '''
         크롤링한 내용을 reviews_yes24.csv로 저장
         '''
-        self.result.to_csv('reviews_yes24.csv', encoding = 'utf-8-sig')
+        output_file = os.path.join(self.output_dir, "reviews_yes24.csv")
+        self.result.to_csv(output_file, index=False, encoding="utf-8-sig")
