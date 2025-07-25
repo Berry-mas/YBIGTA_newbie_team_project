@@ -414,5 +414,5 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 
 - 다음 분석에서는 불용어 제거 및 품사 필터링을 적용하여 더 의미 있는 핵심 키워드와 토픽 중심 분석을 진행할 예정
 
-[차트 보기](https://Berry-mas.github.io/your-repo-name/review_analysis/plots/daily_review_trends_interactive.html)
+[차트 html](review_analysis/plots/daily_review_trends_interactive.html)
 
