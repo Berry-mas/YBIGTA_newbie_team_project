@@ -9,8 +9,15 @@ class yes24Processor(BaseDataProcessor):
         super().__init__(input_path, output_path)
 
     def preprocess(self):
-        
-        df = pd.read_csv(self.input_path)\
+        '''
+        리뷰 전처리:
+        1. rate 숫자만 추출
+        2. 컬럼명 통일
+        3. 결측치 제거
+        4. 이상치 제거
+        5. 특수문자 제거
+        '''
+        df = pd.read_csv(self.input_path)
         
         df["rate"] = df["rate"].astype(str).str.extract(r"(\d+)").astype(float)
         
@@ -43,6 +50,13 @@ class yes24Processor(BaseDataProcessor):
         print("전처리 완료")
     
     def feature_engineering(self):
+        '''
+        파생변수 생성:
+        date를 기반으로 weekday 생성
+
+        텍스트 벡터화:
+        cleaned_text를 기반으로 TF-IDF 텍스트 벡터화
+        '''
         df = self.df
 
         # 파생변수: 요일
@@ -61,6 +75,9 @@ class yes24Processor(BaseDataProcessor):
 
 
     def save_to_database(self):
+        '''
+        전처리 데이터 csv 저장
+        '''
         os.makedirs(self.output_dir, exist_ok=True)
         output_file = os.path.join(self.output_dir, "preprocessed_reviews_yes24.csv")
         self.df.to_csv(output_file, index=False, encoding="utf-8-sig")
