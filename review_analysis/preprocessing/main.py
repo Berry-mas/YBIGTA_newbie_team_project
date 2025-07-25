@@ -3,14 +3,20 @@ import glob
 from argparse import ArgumentParser
 from typing import Dict, Type
 from review_analysis.preprocessing.base_processor import BaseDataProcessor
+from review_analysis.preprocessing.kyobo_processor import KyoboProcessor
+from review_analysis.preprocessing.yes24_processor import yes24Processor
 from review_analysis.preprocessing.aladin_processor import AladinProcessor
+
+
 
 
 # 모든 preprocessing 클래스를 예시 형식으로 적어주세요. 
 # key는 "reviews_사이트이름"으로, value는 해당 처리를 위한 클래스
 PREPROCESS_CLASSES: Dict[str, Type[BaseDataProcessor]] = {
-    "reviews_aladin": AladinProcessor,
-    # key는 크롤링한 csv파일 이름으로 적어주세요! ex. reviews_naver.csv -> reviews_naver
+        # "reviews_kyobo": KyoboProcessor,
+        "reviews_yes24": yes24Processor,
+        # "reviews_aladin": AladinProcessor
+    
 }
 
 REVIEW_COLLECTIONS = glob.glob(os.path.join("..","..","database", "reviews_*.csv"))
@@ -25,6 +31,8 @@ def create_parser() -> ArgumentParser:
     return parser
 
 if __name__ == "__main__":
+
+    
 
     parser = create_parser()
     args = parser.parse_args()
