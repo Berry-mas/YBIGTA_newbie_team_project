@@ -17,7 +17,9 @@ class yes24Processor(BaseDataProcessor):
         4. 이상치 제거
         5. 특수문자 제거
         '''
-        df = pd.read_csv(self.input_path)\
+
+        df = pd.read_csv(self.input_path)
+
         
         df["rate"] = df["rate"].astype(str).str.extract(r"(\d+)").astype(float)
         
