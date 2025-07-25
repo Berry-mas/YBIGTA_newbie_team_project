@@ -10,7 +10,9 @@ class yes24Processor(BaseDataProcessor):
 
     def preprocess(self):
         
-        df = pd.read_csv(self.input_path)
+        df = pd.read_csv(self.input_path)\
+        
+        df["rate"] = df["rate"].astype(str).str.extract(r"(\d+)").astype(float)
         
         #컬럼명 통일
         df = df.rename(columns={
@@ -59,5 +61,7 @@ class yes24Processor(BaseDataProcessor):
 
 
     def save_to_database(self):
+        os.makedirs(self.output_dir, exist_ok=True)
         output_file = os.path.join(self.output_dir, "preprocessed_reviews_yes24.csv")
         self.df.to_csv(output_file, index=False, encoding="utf-8-sig")
+        print(f"저장 완료: {output_file}")

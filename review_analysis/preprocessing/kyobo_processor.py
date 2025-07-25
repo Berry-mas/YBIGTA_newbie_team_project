@@ -25,6 +25,7 @@ class KyoboProcessor(BaseDataProcessor):
         df = df.dropna(subset=["score", "text", "date"])
 
         # 이상치 제거 (별점 범위 밖)
+        df["score"] = pd.to_numeric(df["score"], errors="coerce")
         df = df[(df["score"] >= 0) & (df["score"] <= 10)]
 
         # 텍스트 길이 기준 이상치 제거 (텍스트 데이터 전처리)

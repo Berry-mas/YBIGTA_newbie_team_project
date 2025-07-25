@@ -15,7 +15,7 @@ from review_analysis.preprocessing.aladin_processor import AladinProcessor
 PREPROCESS_CLASSES: Dict[str, Type[BaseDataProcessor]] = {
         # "reviews_kyobo": KyoboProcessor,
         "reviews_yes24": yes24Processor,
-        "reviews_aladin": AladinProcessor
+        # "reviews_aladin": AladinProcessor
     
 }
 
