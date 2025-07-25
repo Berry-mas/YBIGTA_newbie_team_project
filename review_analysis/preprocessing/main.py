@@ -5,6 +5,8 @@ from typing import Dict, Type
 from review_analysis.preprocessing.base_processor import BaseDataProcessor
 from review_analysis.preprocessing.kyobo_processor import KyoboProcessor
 from review_analysis.preprocessing.yes24_processor import yes24Processor
+from review_analysis.preprocessing.aladin_processor import AladinProcessor
+
 
 
 
@@ -13,6 +15,7 @@ from review_analysis.preprocessing.yes24_processor import yes24Processor
 PREPROCESS_CLASSES: Dict[str, Type[BaseDataProcessor]] = {
         # "reviews_kyobo": KyoboProcessor,
         "reviews_yes24": yes24Processor,
+        "reviews_aladin": AladinProcessor
     
 }
 
