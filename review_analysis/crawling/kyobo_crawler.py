@@ -6,12 +6,13 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
+from typing import List, Dict, Any
+import os
 import pandas as pd
 import time
 import csv
-from utils.logger import setup_logger  # 위치에 따라 경로 다를 수 있음
+from utils.logger import setup_logger  
 
 
 chrome_options = Options()
@@ -21,11 +22,21 @@ logger = setup_logger('kyobo.log')
 
 class KyoboCrawler(BaseCrawler):
     def __init__(self, output_dir: str):
+        """
+        교보문고 리뷰 크롤러 초기화 함수
+
+        Args:
+            output_dir (str): 크롤링한 데이터를 저장할 디렉토리 경로
+        """
         super().__init__(output_dir)
         self.base_url = 'https://product.kyobobook.co.kr/detail/S000000610612'
-        self.reviews_data = []
+        self.reviews_data: List[Dict[str, Any]] = []
+
         
     def start_browser(self):
+        """
+        Selenium WebDriver를 초기화하고 해당 책 상세 페이지로 이동
+        """
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), 
                                        options=chrome_options)
         self.driver.get(self.base_url)
@@ -37,6 +48,16 @@ class KyoboCrawler(BaseCrawler):
 
     
     def scrape_reviews(self):
+        """
+        교보문고 웹사이트에서 리뷰 데이터를 크롤링하여 self.reviews_data에 저장
+
+        - 리뷰 섹션으로 스크롤
+        - 정렬 방식 변경 (최근순)
+        - 더보기 버튼을 누르며 리뷰 페이지 반복
+        - 각 리뷰에서 텍스트, 날짜, 별점 정보 추출
+        - 최대 51번 반복하며 리뷰 수집
+        - 예외 발생 시 로깅 처리
+        """
         self.start_browser() 
         # 리뷰 섹션까지 스크롤
 
@@ -119,7 +140,21 @@ class KyoboCrawler(BaseCrawler):
         self.driver.quit()    
     
     def save_to_database(self):
+        """
+        수집한 리뷰 데이터를 CSV 형식으로 저장함.
+
+        - 중복 리뷰 제거
+        - 파일명: 'reviews_kyobo.csv'
+        - 저장 경로: self.output_dir 하위 경로
+        """
         df = pd.DataFrame(self.reviews_data)
         df.drop_duplicates(inplace=True)
-        df.to_csv('reviews_kyobo.csv', encoding='utf-8-sig', index=False, quoting=csv.QUOTE_ALL)
-        logger.info(f"저장 완료: 총 {len(df)}개의 리뷰")
+
+        # 절대경로로 안전하게 변환
+        abs_output_dir = os.path.abspath(self.output_dir)
+        os.makedirs(abs_output_dir, exist_ok=True)
+
+        output_path = os.path.join(abs_output_dir, 'reviews_kyobo.csv')
+
+        df.to_csv(output_path, encoding='utf-8-sig', index=False, quoting=csv.QUOTE_ALL)
+        logger.info(f"저장 완료: 총 {len(df)}개의 리뷰 → {output_path}")
