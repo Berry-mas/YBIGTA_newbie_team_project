@@ -76,7 +76,7 @@
     | rate | 리뷰 평점 (예: 평점10점) |
     | Unnamed: 0 | 인덱스 열 |
 
-### **코드 실행 방법**
+### 코드 실행 방법
 
 #### 1. Web
 
@@ -110,9 +110,9 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 - Windows(Powershell 기준) : $env:PYTHONPATH = "../.."
   를 입력한 후 python main.py -o ../../database --all 을 입력해주세요.
 
-### **EDA&FE, 시각화 설명**
+## **EDA&FE, 시각화 설명**
 
-#### 1. EDA: 개별 사이트에 대한 시각화 그래프 & 설명
+### 1. EDA: 개별 사이트에 대한 시각화 그래프 & 설명
 
 <details>
 <summary> kyobo - EDA/FE, 시각화 과제</summary>
@@ -193,7 +193,36 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 
 </details>
 
-#### 2. 전처리/FE: 각 크롤링 csv파일에 대해 진행한 결과 설명
+<details> 
+<summary> yes24 - EDA/FE, 시각화 과제</summary>
+
+### yes24 EDA
+
+1. 별점 분석
+   ![alt text](review_analysis/plots/yes24_score_hist.png)
+
+- 전체의 약 92%가 별점 10점으로 평가하였으며 7점 미만이 2%가 채 되지 않는다.
+
+2. 날짜별 리뷰 수
+   ![alt text](review_analysis/plots/yes24_review_count.png)
+
+- 대부분이 2024년 후반 2025년 초반에 몰려있다.
+- 2019년 중반에도 존재한다.
+
+3. 텍스트 길이 분포
+   ![alt text](review_analysis/plots/yes24_textlen_hist.png)
+
+- 대부분 리뷰들의 길이는 200자 이하에 분포해있다.
+- 200자 이후로는 리뷰 수가 급격하게 줄어든다.
+
+4. 요일에 따른 리뷰 수
+   ![alt text](review_analysis/plots/yes24_weekday_review_count.png)
+
+- 전반적으로 모든 요일에 걸쳐 리뷰가 작성되었다.
+- 그 중 특히 수요일, 일요일에 약160개의 많은 리뷰가 작성되었다.
+</details>
+
+### 2. 전처리/FE: 각 크롤링 csv파일에 대해 진행한 결과 설명
 
 <details> 
 <summary> kyobo - Preprocessing / FE </summary>
@@ -203,14 +232,10 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 각 크롤링된 CSV 파일에 대해 진행한 전처리 및 피처 엔지니어링 과정을 설명합니다.  
 모든 단계는 모델 입력을 위한 정제 및 벡터화를 목표로 수행되었습니다.
 
----
-
 #### 1. 결측치 처리
 
 - `score`, `text`, `date` 컬럼에서 결측값이 존재하는 행은 모두 제거하였습니다.
 - 분석 및 벡터화 과정에서 오류를 유발하거나 무의미한 데이터를 제거함으로써 데이터 정합성을 확보했습니다.
-
----
 
 #### 2. 이상치 제거
 
@@ -220,23 +245,17 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
   - 리뷰 텍스트의 길이가 5자 미만이거나 1000자 초과인 경우
 - 이러한 이상치는 시스템 오류, 자동 생성 리뷰, 의도치 않은 입력 등으로 발생했을 가능성이 있어 제거 대상이 되었습니다.
 
----
-
 #### 3. 텍스트 데이터 전처리
 
 - 리뷰 텍스트에서 한글, 숫자, 공백 외의 특수문자를 모두 제거하였습니다.
 - 정규표현식을 이용해 불필요한 기호, 이모지, HTML 태그 등을 제거하여 텍스트 분석 품질을 향상시켰습니다.
 - 전처리된 텍스트는 `cleaned_text` 컬럼으로 저장하였습니다.
 
----
-
 #### 4. 파생변수 생성
 
 - 리뷰 작성 날짜(`date`)로부터 요일 정보를 파생하여 `weekday` 컬럼을 생성하였습니다.
 - 이 파생변수는 주말/평일 리뷰 작성 패턴, 소비자 반응 시간대 분석 등에 활용될 수 있습니다.
 - 예: Monday, Tuesday, ..., Sunday
-
----
 
 #### 5. 텍스트 벡터화 (TF-IDF)
 
@@ -276,9 +295,123 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 
 </details>
 
-#### 3. 비교분석: 결과에 대한 시각화 그래프 & 설명
+<details> 
+<summary> yes24 - Preprocessing / FE </summary>
 
-<!-- [인터랙티브 리뷰 트렌드 차트 보기](review_analysis/plots/daily_review_trends_interactive.html)
+### yes24 Preprocessing / FE
 
-<iframe src="review_analysis/plots/daily_review_trends_interactive.html"
-        width="100%" height="600px" frameborder="0"></iframe> -->
+1. 컬럼명 통일
+   -score, date, text로 컬럼명 통일
+
+2. 결측치 처리
+
+- 결측치가 있는 행은 모두 제거
+
+2. 이상치 제거
+
+- score 범위 아닌 경우 제거(0~10)
+- text의 길이가 5자 미만 or 1000자 초과인 경우 제거
+
+3. 텍스트 전처리
+
+- text에서 한글, 숫자, 공백 외의 특수문자 제거
+- rate에서 숫자만 추출(-> 후에 score로 컬럼명 통일)
+
+4.  파생변수 생성
+
+- 요일(Weekday) : date컬럼을 통해 weekday 파생변수 생성
+
+5. 텍스트 벡터화 (TF-IDF)
+
+- cleaned_text 컬럼의 데이터를 기반으로, 상위 100개의 단어에 대해 TF-IDF 벡터 생성
+- 각 문장은 tfidf_0 ~ tfidf_99로 이루어진 100차원 수치 벡터로 변환됨
+
+</details>
+
+### 3. 비교분석: 결과에 대한 시각화 그래프 & 설명
+
+#### TF-IDF 상위 단어 분석 결과
+
+1. KYOBO
+   ![alt text](review_analysis/plots/tfidf_top_words_kyobo.png)
+
+- 상위 단어: 너무, 한강, 감사합니다, 책입니다, 읽고, 작가님, 읽었습니다, 좋아요, 좋은, 정답
+
+- 특징:
+
+  - 감상적 표현이 뚜렷함 (감사합니다, 좋아요, 좋은)
+
+  - ‘책입니다’, ‘읽었습니다’ 등의 정중한 서술형 문장이 많음
+
+  - ‘한강’, ‘작가님’ → 작가 중심의 리뷰 경향
+
+2. ALADIN
+   ![alt text](review_analysis/plots/tfidf_top_words_aladin.png)
+
+- 상위 단어: 책을, 너무, 다시, 가슴이, 소설, 읽는, 논문이, 읽고, 한강, 있는
+
+- 특징:
+
+  - 감성적 단어(예: 가슴이, 다시, 논문이)가 상위에 포함
+
+  - ‘책을’, ‘읽는’, ‘읽고’ 등 읽기 행위와 관련된 단어가 많이 등장함
+
+  - ‘한강’ 등장으로 미루어 작가 한강을 언급하는 리뷰가 많음
+
+3. YES24
+   ![alt text](review_analysis/plots/tfidf_top_words_yes24.png)
+
+- 상위 단어: 한강, 소년이, 책을, 작가님의, 너무, 읽고, 있는, 다시, 온다, 온다를
+
+- 특징:
+
+  - “소년이 온다”, “온다를” 등 → 특정 작품에 집중된 리뷰 많음
+
+  - ‘작가님의’, ‘읽고’, ‘다시’ 등 작가 존중/반복 감상 분위기 뚜렷
+
+#### 워드클라우드로 본 특징 요약
+
+1. KYOBO
+   ![alt text](review_analysis/plots/wordcloud_kyobo.png)
+
+- ‘책입니다’, ‘읽었습니다’, ‘감사합니다’, ‘좋아요’ 등 공손한 표현 다수
+
+- 전체적으로 감상 후 느낌을 전하는 공식적인 톤이 강함
+
+2. ALADIN
+   ![alt text](review_analysis/plots/wordcloud_aladin.png)
+
+- ‘책을’, ‘소설’, ‘가슴’, ‘읽고’, ‘작가의’ 등 감정이입이 많은 단어 중심
+- ‘한강’, ‘광주’, ‘민주주의’ 등의 키워드가 보여 사회적 메시지를 주고자 하는 리뷰가 많아 보임
+
+3. YES24
+   ![alt text](review_analysis/plots/wordcloud_yes24.png)
+
+- ‘작가님의’, ‘소년이’, ‘온다’, ‘한강’, ‘읽고’ 등의 단어들이 두드러짐
+
+- 작가 및 작품에 집중된 팬 중심 리뷰가 많아 보임
+
+#### 사이트별 리뷰 수 추이 분석
+
+![alt text](review_analysis/plots/wordcloud_yes24.png)
+
+- 2024년 하반기부터 세 사이트 모두 리뷰 수가 급증
+
+- 이러한 급증은 **2023년 말 한강 작가의 노벨문학상 수상** 이슈와 맞물려,
+  작가에 대한 관심이 폭발적으로 증가한 영향으로 해석 가능
+
+- YES24가 다른 사이트 대비 리뷰 수가 가장 많고 꾸준함
+
+- YES24는 리뷰 수가 가장 많고, 증가 폭도 가장 큼
+
+- Aladin은 상대적으로 초반(2015~2020)에도 소수 리뷰가 존재
+
+- 전반적으로 최근 1년 간의 리뷰 데이터가 분석의 핵심 기반
+
+#### 정리 및 향후 계획
+
+- 현재 분석 결과는 불용어를 제거하지 않은 상태로, “있다”, “이다”, “너무” 등의 단어가 상위에 포함되어 있음
+
+- 다음 분석에서는 불용어 제거 및 품사 필터링을 적용하여 더 의미 있는 핵심 키워드와 토픽 중심 분석을 진행할 예정
+
+[차트 보기](review_analysis/plots/daily_review_trends_interactive.html)
