@@ -8,6 +8,8 @@ from review_analysis.preprocessing.base_processor import BaseDataProcessor
 class KyoboProcessor(BaseDataProcessor):
     def __init__(self, input_path: str, output_path: str):
         super().__init__(input_path, output_path)
+        self.docs = []  
+        self.df = None
 
     def preprocess(self):
         """
@@ -17,7 +19,11 @@ class KyoboProcessor(BaseDataProcessor):
         - 너무 짧거나 긴 리뷰 제거 (5~1000자)
         - 특수문자 제거 후 cleaned_text 생성
         """
-        df = pd.read_csv(self.input_path)
+        if self.input_path:  # CSV 모드
+            df = pd.read_csv(self.input_path)
+        else:  # MongoDB 모드
+            df = pd.DataFrame(self.docs)
+
         df["text"] = df["text"].astype(str)
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
@@ -66,7 +72,14 @@ class KyoboProcessor(BaseDataProcessor):
         - 경로: self.output_dir
         - 파일명: preprocessed_reviews_kyobo.csv
         """
-        os.makedirs(self.output_dir, exist_ok=True)
-        output_file = os.path.join(self.output_dir, "preprocessed_reviews_kyobo.csv")
-        self.df.to_csv(output_file, index=False, encoding="utf-8-sig")
-        print(f"저장 완료: {output_file}")
+        if self.output_dir:  # CSV 저장 경로가 있을 경우만 저장
+            os.makedirs(self.output_dir, exist_ok=True)
+            output_file = os.path.join(self.output_dir, "preprocessed_reviews_kyobo.csv")
+            self.df.to_csv(output_file, index=False, encoding="utf-8-sig")
+            print(f"저장 완료: {output_file}")
+
+    def load_from_mongodb(self, mongo_docs):
+        """
+        MongoDB에서 불러온 raw document 리스트를 받아 self.docs에 저장
+        """
+        self.docs = mongo_docs
