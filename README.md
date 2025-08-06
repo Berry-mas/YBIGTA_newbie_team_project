@@ -414,5 +414,17 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 
 - 다음 분석에서는 불용어 제거 및 품사 필터링을 적용하여 더 의미 있는 핵심 키워드와 토픽 중심 분석을 진행할 예정
 
-[차트 html](review_analysis/plots/daily_review_trends_interactive.html)
+---
 
+### Docker Hub 주소 : https://hub.docker.com/r/berrymas/ybigta-newbie-team-project
+
+---
+
+### Docker/DB 통합 과제 이미지
+
+![alt text](aws/github_action.png)
+![alt text](aws/get_1.png)
+![alt text](aws/post_2_login.png)
+![alt text](aws/post_3_register.png)
+![alt text](aws/delete_4.png)
+![alt text](aws/put_5_update.png)
