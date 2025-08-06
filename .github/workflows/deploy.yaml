@@ -39,4 +39,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/ybigta-newbie-team-project
             docker stop ybigta-app || true
             docker rm ybigta-app || true
-            docker run -d --name ybigta-app -p 8080:8000 ${{ secrets.DOCKER_USERNAME }}/ybigta-newbie-team-project
+            docker run -d --name ybigta-app -p 8080:8000 --env-file .env ${{ secrets.DOCKER_USERNAME }}/ybigta-newbie-team-project
