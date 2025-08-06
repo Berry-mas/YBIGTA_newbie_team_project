@@ -5,10 +5,14 @@ import re
 import os
 
 class Yes24Processor(BaseDataProcessor):
-    def __init__(self, input_path: str, output_path: str):
-        super().__init__(input_path, output_path)
+    # def __init__(self, input_path: str, output_path: str):
+    #     super().__init__(input_path, output_path)
+    def __init__(self, mongo_db, site_name: str):
+        self.mongo_db = mongo_db
+        self.site_name = site_name
+        self.df = None
 
-    def preprocess(self):
+    def preprocess(self, raw_reviews):
         '''
         리뷰 전처리:
         1. rate 숫자만 추출
@@ -17,18 +21,30 @@ class Yes24Processor(BaseDataProcessor):
         4. 이상치 제거
         5. 특수문자 제거
         '''
-
-        df = pd.read_csv(self.input_path)
+        
+        # df = pd.read_csv(self.input_path)
 
         
-        df["rate"] = df["rate"].astype(str).str.extract(r"(\d+)").astype(float)
+        # df["rate"] = df["rate"].astype(str).str.extract(r"(\d+)").astype(float)
+        # MongoDB 데이터를 DataFrame으로 변환
+        df = pd.DataFrame(raw_reviews)
         
-        #컬럼명 통일
-        df = df.rename(columns={
-        "rate": "score",
-        "review": "text",
-        "day": "date"
-        })
+        # Yes24 데이터 구조: ['_id', 'rate', 'day', 'review']
+        
+        # 1. rate 컬럼 처리 (평점10점 -> 10)
+        if "rate" in df.columns:
+            df["score"] = df["rate"].astype(str).str.extract(r"(\d+)").astype(float)
+        
+        # 2. 컬럼명 통일
+        if "review" in df.columns:
+            df["text"] = df["review"].astype(str)
+        
+        if "day" in df.columns:
+            df["date"] = pd.to_datetime(df["day"], errors="coerce")
+            
+        # 3. 불필요한 컬럼 제거 (_id는 MongoDB 기본 키)
+        columns_to_drop = ["_id", "rate", "day", "review"]
+        df.drop(columns=[col for col in columns_to_drop if col in df.columns], inplace=True, errors='ignore')
 
         #data type 변환
         df["text"] = df["text"].astype(str)
@@ -77,10 +93,25 @@ class Yes24Processor(BaseDataProcessor):
 
 
     def save_to_database(self):
-        '''
-        전처리 데이터 csv 저장
-        '''
-        os.makedirs(self.output_dir, exist_ok=True)
-        output_file = os.path.join(self.output_dir, "preprocessed_reviews_yes24.csv")
-        self.df.to_csv(output_file, index=False, encoding="utf-8-sig")
-        print(f"저장 완료: {output_file}")
+        # '''
+        # 전처리 데이터 csv 저장
+        # '''
+        # os.makedirs(self.output_dir, exist_ok=True)
+        # output_file = os.path.join(self.output_dir, "preprocessed_reviews_yes24.csv")
+        # self.df.to_csv(output_file, index=False, encoding="utf-8-sig")
+        # print(f"저장 완료: {output_file}")
+        """전처리된 데이터를 MongoDB의 yes24_preprocessed 컬렉션에 저장"""
+        if self.df is not None:
+            preprocessed_collection = self.mongo_db["yes24_preprocessed"]
+            
+            # DataFrame을 딕셔너리 리스트로 변환
+            records = self.df.to_dict('records')
+            
+            # MongoDB에 저장
+            if records:
+                preprocessed_collection.insert_many(records)
+                print(f"MongoDB에 {len(records)}개의 전처리된 데이터 저장 완료: yes24_preprocessed")
+            else:
+                print("저장할 데이터가 없습니다.")
+        else:
+            print("전처리된 데이터가 없습니다. preprocess()를 먼저 실행하세요.")

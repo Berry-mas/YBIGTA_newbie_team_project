@@ -22,3 +22,4 @@ pymongo
 dotenv
 scikit-learn
 pandas
+pymysql
