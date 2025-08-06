@@ -428,3 +428,4 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 ![alt text](aws/post_3_register.png)
 ![alt text](aws/delete_4.png)
 ![alt text](aws/put_5_update.png)
+![alt text](aws/post_6_preprocess.png)
