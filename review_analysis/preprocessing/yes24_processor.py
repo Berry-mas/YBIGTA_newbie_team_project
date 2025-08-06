@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import os
 
-class yes24Processor(BaseDataProcessor):
+class Yes24Processor(BaseDataProcessor):
     def __init__(self, input_path: str, output_path: str):
         super().__init__(input_path, output_path)
 
