@@ -6,8 +6,8 @@ from sqlalchemy import text
 from database.mysql_connection import SessionLocal
 
 class UserRepository:
-    def __init__(self):
-        pass
+    def __init__(self, db: Session):
+        self.db = db
     
     def _get_db(self) -> Session:
         return SessionLocal()
