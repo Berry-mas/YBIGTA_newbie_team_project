@@ -6,6 +6,8 @@ from sqlalchemy import text
 
 class UserRepository:
     def __init__(self, db: Session):
+        if db is None:
+            raise ValueError("Database session cannot be None")
         self.db = db
 
     # def _load_users(self) -> Dict[str, Dict]:
