@@ -17,7 +17,7 @@ def get_db():
 def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
     if db is None:
         raise ("DaValueErrortabase session is None")
-    return UserRepository(db)
+    return UserRepository()
 
 def get_user_service(repo: UserRepository = Depends(get_user_repository)) -> UserService:
     if repo is None:
