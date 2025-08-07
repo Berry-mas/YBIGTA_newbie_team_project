@@ -10,6 +10,8 @@ class UserRepository:
         self.db = db
     
     def _get_db(self) -> Session:
+        if self.db:
+            return self.db
         return SessionLocal()
 
     # def _load_users(self) -> Dict[str, Dict]:
