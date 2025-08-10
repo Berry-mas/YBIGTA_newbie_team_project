@@ -46,11 +46,12 @@ def rag_review_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
         k: int = int(state.get("k", 4))
 
-        # 우선 FAISS 사용, 실패 시 TF-IDF 폴백
+        # 우선 API 임베딩 사용, 실패 시 TF-IDF 폴백
         try:
-            retriever = get_faiss_retriever()
-            print("FAISS 사용")
-        except Exception:
+            retriever = get_faiss_retriever(use_api=True)
+            print("API 임베딩 사용")
+        except Exception as e:
+            print(f"API 임베딩 실패, TF-IDF 폴백: {e}")
             retriever = get_retriever()
         llm = get_llm()
 
