@@ -19,6 +19,13 @@ try:
 except ImportError:
     RAG_AVAILABLE = False
 
+# feature/subject-node 브랜치 호환성
+try:
+    from st_app.graph.nodes.subject_info_node import subject_info_node
+    SUBJECT_NODE_AVAILABLE = True
+except ImportError:
+    SUBJECT_NODE_AVAILABLE = False
+
 
 def init_api_client():
     """API 클라이언트 초기화"""
@@ -47,6 +54,8 @@ def init_session_state():
         st.session_state.chat_node = ChatNode(st.session_state.api_client)
     if "use_rag" not in st.session_state:
         st.session_state.use_rag = False
+    if "use_simple_mode" not in st.session_state:
+        st.session_state.use_simple_mode = False
 
 
 def display_message(role: str, content: str):
@@ -113,36 +122,62 @@ def main():
             st.session_state.chat_node = ChatNode(st.session_state.api_client)
             st.success("API 키가 설정되었습니다!")
         
-        # RAG 모드 선택
-        if RAG_AVAILABLE:
-            st.subheader("🔧 모드 선택")
-            use_rag = st.checkbox("RAG 모드 사용", value=st.session_state.use_rag)
-            if use_rag != st.session_state.use_rag:
-                st.session_state.use_rag = use_rag
-                st.rerun()
-            
-            if use_rag:
-                st.number_input("Top-k (RAG)", min_value=1, max_value=10, value=4, step=1, key="topk")
-        else:
-            st.info("⚠️ RAG 기능을 사용할 수 없습니다. Chat Node만 사용됩니다.")
+        # 모드 선택
+        st.subheader("🔧 모드 선택")
+        
+        # 간단 모드 선택
+        use_simple_mode = st.checkbox("간단 모드 사용", value=st.session_state.use_simple_mode)
+        if use_simple_mode != st.session_state.use_simple_mode:
+            st.session_state.use_simple_mode = use_simple_mode
+            st.rerun()
+        
+        if not use_simple_mode:
+            # RAG 모드 선택
+            if RAG_AVAILABLE:
+                use_rag = st.checkbox("RAG 모드 사용", value=st.session_state.use_rag)
+                if use_rag != st.session_state.use_rag:
+                    st.session_state.use_rag = use_rag
+                    st.rerun()
+                
+                if use_rag:
+                    st.number_input("Top-k (RAG)", min_value=1, max_value=10, value=4, step=1, key="topk")
+            else:
+                st.info("⚠️ RAG 기능을 사용할 수 없습니다. Chat Node만 사용됩니다.")
         
         # 상태 정보 표시
         st.subheader("📊 현재 상태")
-        st.write(f"**현재 노드**: {st.session_state.chat_state.current_node}")
-        st.write(f"**메시지 수**: {len(st.session_state.chat_state.messages)}")
-        if RAG_AVAILABLE and st.session_state.use_rag:
+        if use_simple_mode:
+            st.write("**모드**: 간단 모드")
+        elif RAG_AVAILABLE and st.session_state.use_rag:
             st.write(f"**모드**: RAG (Top-k: {st.session_state.get('topk', 4)})")
         else:
             st.write("**모드**: Chat Node")
         
+        if not use_simple_mode:
+            st.write(f"**현재 노드**: {st.session_state.chat_state.current_node}")
+            st.write(f"**메시지 수**: {len(st.session_state.chat_state.messages)}")
+        
         # 대화 초기화 버튼
         if st.button("🔄 대화 초기화"):
-            st.session_state.chat_state.reset()
+            if use_simple_mode:
+                st.session_state.messages = []
+            else:
+                st.session_state.chat_state.reset()
             st.rerun()
         
         # 사용법 안내
         st.subheader("💡 사용법")
-        if st.session_state.use_rag and RAG_AVAILABLE:
+        if use_simple_mode:
+            st.markdown("""
+            **간단 모드:**
+            - 기본적인 책 정보 질의 응답
+            - 빠르고 간단한 인터페이스
+            
+            **예시 질문:**
+            - "소년이 온다 정보 알려줘"
+            - "작가 정보는?"
+            """)
+        elif st.session_state.use_rag and RAG_AVAILABLE:
             st.markdown("""
             **RAG 모드:**
             - 모든 질문에 대해 리뷰 데이터를 검색하여 답변
@@ -171,7 +206,9 @@ def main():
     st.markdown("**한강 작가의 '소년이 온다'**에 대한 yes24, 알라딘, 교보문고 리뷰 데이터를 분석해드립니다!")
     
     # 모드 표시
-    if RAG_AVAILABLE and st.session_state.use_rag:
+    if st.session_state.use_simple_mode:
+        st.success("🚀 간단 모드로 실행 중")
+    elif RAG_AVAILABLE and st.session_state.use_rag:
         st.success("🚀 RAG 모드로 실행 중 - 리뷰 데이터를 검색하여 답변합니다!")
     else:
         st.info("💬 Chat Node 모드로 실행 중")
@@ -186,75 +223,109 @@ def main():
         - **데이터**: yes24, 알라딘, 교보문고 리뷰/평점
         """)
     
-    # 현재 노드 표시
-    st.info(f"🎯 현재 노드: **{st.session_state.chat_state.current_node.upper()}**")
+    # 간단 모드 처리
+    if st.session_state.use_simple_mode:
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        # 과거 대화 렌더링
+        for m in st.session_state.messages:
+            with st.chat_message(m["role"]):
+                st.markdown(m["content"])
+
+        user_msg = st.chat_input("책 정보 물어봐!")
+        if user_msg:
+            # 1) 즉시 화면에 사용자 메시지 표시 + 히스토리에 추가
+            with st.chat_message("user"):
+                st.markdown(user_msg)
+            st.session_state.messages.append({"role": "user", "content": user_msg})
+
+            # 2) 노드 실행
+            if SUBJECT_NODE_AVAILABLE:
+                state = {"user_msg": user_msg, "subject_name": None, "last_answer": None}
+                subject_info_node(state)
+                reply = state["last_answer"]
+            else:
+                reply = "죄송합니다. 간단 모드에서 노드를 찾을 수 없습니다."
+
+            # 3) 어시스턴트 표시 + 히스토리 추가
+            with st.chat_message("assistant"):
+                st.markdown(reply)
+            st.session_state.messages.append({"role": "assistant", "content": reply})
     
-    # 채팅 히스토리 표시
-    for message in st.session_state.chat_state.messages:
-        display_message(message["role"], message["content"])
-    
-    # 사용자 입력
-    if prompt := st.chat_input("메시지를 입력하세요..."):
-        # 사용자 메시지 추가 및 표시
-        st.session_state.chat_state.add_message("user", prompt)
-        display_message("user", prompt)
+    else:
+        # 기존 복잡한 모드 처리
+        # 현재 노드 표시
+        st.info(f"🎯 현재 노드: **{st.session_state.chat_state.current_node.upper()}**")
         
-        # RAG 모드 또는 Chat Node 실행
-        with st.spinner("응답을 생성하고 있습니다..."):
-            try:
-                if RAG_AVAILABLE and st.session_state.use_rag:
-                    # RAG 모드 실행
-                    state = {
-                        "messages": st.session_state.chat_state.messages, 
-                        "k": int(st.session_state.get("topk", 4))
-                    }
+        # 채팅 히스토리 표시
+        for message in st.session_state.chat_state.messages:
+            display_message(message["role"], message["content"])
+        
+        # 사용자 입력
+        if prompt := st.chat_input("메시지를 입력하세요..."):
+            # 사용자 메시지 추가 및 표시
+            st.session_state.chat_state.add_message("user", prompt)
+            display_message("user", prompt)
+            
+            # RAG 모드 또는 Chat Node 실행
+            with st.spinner("응답을 생성하고 있습니다..."):
+                try:
+                    if RAG_AVAILABLE and st.session_state.use_rag:
+                        # RAG 모드 실행
+                        state = {
+                            "messages": st.session_state.chat_state.messages, 
+                            "k": int(st.session_state.get("topk", 4))
+                        }
+                        
+                        try:
+                            app = get_graph_app()
+                            out = app.invoke(state)
+                        except Exception:
+                            out = run_graph(state)
+                        
+                        # RAG 결과 처리
+                        messages = out.get("messages", [])
+                        if messages and len(messages) > len(st.session_state.chat_state.messages):
+                            # 새로운 어시스턴트 메시지가 있으면 추가
+                            new_message = messages[-1]
+                            if new_message["role"] == "assistant":
+                                st.session_state.chat_state.add_message("assistant", new_message["content"])
+                                display_message("assistant", new_message["content"])
+                                
+                                # citations 표시
+                                citations = out.get("citations", [])
+                                if citations:
+                                    with st.expander("📚 참고 자료", expanded=False):
+                                        for i, citation in enumerate(citations, 1):
+                                            st.write(f"{i}. {citation.get('content', '')[:100]}...")
+                        
+                        # 세션 메시지 업데이트
+                        st.session_state.chat_state.messages = messages
+                        
+                    else:
+                        # Chat Node 실행 (기존 방식)
+                        result = st.session_state.chat_node.run(prompt, st.session_state.chat_state)
+                        
+                        # 어시스턴트 응답 표시
+                        display_message("assistant", result["response"])
+                        
+                        # 다음 노드 정보 표시 (개발용)
+                        if result["intent"] != "chat":
+                            st.warning(f"🔄 다음에 {result['intent']} 노드로 라우팅될 예정입니다. (신뢰도: {result['confidence']:.2f})")
                     
-                    try:
-                        app = get_graph_app()
-                        out = app.invoke(state)
-                    except Exception:
-                        out = run_graph(state)
-                    
-                    # RAG 결과 처리
-                    messages = out.get("messages", [])
-                    if messages and len(messages) > len(st.session_state.chat_state.messages):
-                        # 새로운 어시스턴트 메시지가 있으면 추가
-                        new_message = messages[-1]
-                        if new_message["role"] == "assistant":
-                            st.session_state.chat_state.add_message("assistant", new_message["content"])
-                            display_message("assistant", new_message["content"])
-                            
-                            # citations 표시
-                            citations = out.get("citations", [])
-                            if citations:
-                                with st.expander("📚 참고 자료", expanded=False):
-                                    for i, citation in enumerate(citations, 1):
-                                        st.write(f"{i}. {citation.get('content', '')[:100]}...")
-                    
-                    # 세션 메시지 업데이트
-                    st.session_state.chat_state.messages = messages
-                    
-                else:
-                    # Chat Node 실행 (기존 방식)
-                    result = st.session_state.chat_node.run(prompt, st.session_state.chat_state)
-                    
-                    # 어시스턴트 응답 표시
-                    display_message("assistant", result["response"])
-                    
-                    # 다음 노드 정보 표시 (개발용)
-                    if result["intent"] != "chat":
-                        st.warning(f"🔄 다음에 {result['intent']} 노드로 라우팅될 예정입니다. (신뢰도: {result['confidence']:.2f})")
-                
-            except Exception as e:
-                st.error(f"오류가 발생했습니다: {str(e)}")
-                # 기본 응답 추가
-                fallback_response = "죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요."
-                st.session_state.chat_state.add_message("assistant", fallback_response)
-                display_message("assistant", fallback_response)
+                except Exception as e:
+                    st.error(f"오류가 발생했습니다: {str(e)}")
+                    # 기본 응답 추가
+                    fallback_response = "죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요."
+                    st.session_state.chat_state.add_message("assistant", fallback_response)
+                    display_message("assistant", fallback_response)
     
     # 하단 정보
     st.markdown("---")
-    if RAG_AVAILABLE and st.session_state.use_rag:
+    if st.session_state.use_simple_mode:
+        st.markdown("💻 **개발 정보**: 간단 모드 - 기본 책 정보 질의")
+    elif RAG_AVAILABLE and st.session_state.use_rag:
         st.markdown("💻 **개발 정보**: RAG 모드 - 리뷰 데이터 검색 기반 답변")
     else:
         st.markdown("💻 **개발 정보**: Chat Node 모드 - 의도 분석 기반 답변")

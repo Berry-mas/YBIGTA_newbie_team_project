@@ -3,11 +3,16 @@
 """
 from __future__ import annotations
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, TypedDict
 from dataclasses import dataclass, field
 import json
 
 Message = Dict[str, Any]
+
+
+class ChatMessage(TypedDict):
+    role: str       # "user" | "assistant" | "system"
+    content: str
 
 
 @dataclass
@@ -22,6 +27,11 @@ class ChatState:
     last_route: Optional[str] = None
     citations: List[Dict[str, Any]] = field(default_factory=list)
     error: Optional[Dict[str, Any]] = None
+    
+    # feature/subject-node 브랜치 호환성 필드들
+    user_msg: str = ""
+    last_answer: Optional[str] = None
+    subject_name: Optional[str] = None
     
     def add_message(self, role: str, content: str):
         """메시지 추가"""
@@ -62,6 +72,9 @@ class ChatState:
         self.citations.clear()
         self.error = None
         self.last_route = None
+        self.user_msg = ""
+        self.last_answer = None
+        self.subject_name = None
     
     def to_dict(self) -> Dict[str, Any]:
         """상태를 딕셔너리로 변환 (RAG 호환성)"""
@@ -72,3 +85,27 @@ class ChatState:
             "citations": self.citations,
             "error": self.error,
         }
+
+
+# feature/subject-node 브랜치 호환성 함수들
+def new_state() -> ChatState:
+    return ChatState(
+        user_msg="",
+        last_answer=None,
+        subject_name=None,
+        messages=[]
+    )
+
+
+def push_user(state: ChatState, text: str) -> None:
+    state.user_msg = text
+    if not state.messages:
+        state.messages = []
+    state.messages.append({"role": "user", "content": text})
+
+
+def push_assistant(state: ChatState, text: str) -> None:
+    state.last_answer = text
+    if not state.messages:
+        state.messages = []
+    state.messages.append({"role": "assistant", "content": text})
