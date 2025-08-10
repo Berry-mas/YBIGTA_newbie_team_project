@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional
 
 # MongoDB 연결은 실제 사용 시점에 import하도록 변경
 # from database.mongodb_connection import mongo_db
@@ -51,3 +53,35 @@ def preprocess_reviews(site_name: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"MongoDB connection error: {str(e)}")
+
+
+class RAGQuery(BaseModel):
+    question: str
+    k: Optional[int] = 4
+
+
+@router.post("/rag")
+def answer_with_rag(payload: RAGQuery):
+    try:
+        # Import at runtime to avoid optional dep errors during unrelated routes
+        from nodes.rag_review_node import rag_review_node
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"RAG node unavailable: {e}")
+
+    state = {
+        "messages": [{"role": "user", "content": payload.question}],
+        "k": payload.k or 4,
+    }
+    out = rag_review_node(state)
+
+    # Extract assistant message and citations
+    messages = out.get("messages", [])
+    if not messages:
+        raise HTTPException(status_code=500, detail="RAG produced no messages")
+    last = messages[-1]
+    return {
+        "answer": last.get("content", ""),
+        "citations": out.get("citations", []),
+        "route": out.get("last_route"),
+        "error": out.get("error"),
+    }
