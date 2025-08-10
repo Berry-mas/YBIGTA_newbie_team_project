@@ -1,21 +1,14 @@
 {
-  "AirPods Pro": {
-    "category": "earbuds",
-    "maker": "Apple",
-    "highlights": [
-      "Active Noise Cancellation with Transparency mode",
-      "Adaptive EQ, H2 chip",
-      "MagSafe charging case"
-    ]
-  },
   "소년이 온다": {
-    "category": "book",
+    "title": "소년이 온다",
     "author": "한강",
-    "highlights": [
-      "5.18 광주민주화항쟁을 소설 형식으로 다룬 작품",
-      "담담하지만 강렬한 서술",
-      "기억과 증언, 애도의 정서"
-    ]
+    "publisher": "창비",
+    "published_date": "2014-05-19",
+    "genres": ["한국문학", "장편소설"],
+    "awards": ["2024 노벨문학상 수상"],
+    "pages": 216,
+    "language": "한국어",
+    "summary": "1980년 5월 광주를 배경으로 한 소설로, 당시의 참상을 다양한 인물 시점에서 그린 작품.",
+    "aliases": ["소년이온다", "소년 이 온다", "Human Acts"]
   }
 }
-

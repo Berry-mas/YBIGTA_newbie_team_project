@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 import streamlit as st
 
-from st_app.rag.router import run_graph
-from st_app.rag.graph.graph import get_graph_app
+from st_app.graph.router import run_graph
+from st_app.graph.graph import get_graph_app
 
 
 st.set_page_config(page_title="YBIGTA RAG Agent", page_icon="🤖", layout="centered")

@@ -6,10 +6,10 @@ import operator
 
 from langgraph.graph import StateGraph, START, END
 
-from st_app.rag.nodes.chat_node import chat_node
-from st_app.rag.nodes.subject_info_node import subject_info_node
-from st_app.rag.nodes.rag_review_node import rag_review_node
-from st_app.rag.router import _decide_route  # reuse the LLM routing logic
+from st_app.graph.nodes.chat_node import chat_node
+from st_app.graph.nodes.subject_info_node import subject_info_node
+from st_app.graph.nodes.rag_review_node import rag_review_node
+from st_app.graph.router import _decide_route  # reuse the LLM routing logic
 
 
 class GraphState(TypedDict, total=False):
