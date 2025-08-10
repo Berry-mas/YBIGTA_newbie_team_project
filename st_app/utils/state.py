@@ -1,9 +1,13 @@
 """
 상태 관리를 위한 모듈
 """
-from typing import Dict, Any, List
+from __future__ import annotations
+
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 import json
+
+Message = Dict[str, Any]
 
 
 @dataclass
@@ -12,6 +16,12 @@ class ChatState:
     messages: List[Dict[str, str]] = field(default_factory=list)
     current_node: str = "chat"
     intent_history: List[Dict[str, Any]] = field(default_factory=list)
+    
+    # RAG 관련 필드들
+    k: int = 4
+    last_route: Optional[str] = None
+    citations: List[Dict[str, Any]] = field(default_factory=list)
+    error: Optional[Dict[str, Any]] = None
     
     def add_message(self, role: str, content: str):
         """메시지 추가"""
@@ -49,3 +59,16 @@ class ChatState:
         self.messages.clear()
         self.intent_history.clear()
         self.current_node = "chat"
+        self.citations.clear()
+        self.error = None
+        self.last_route = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """상태를 딕셔너리로 변환 (RAG 호환성)"""
+        return {
+            "messages": self.messages,
+            "k": self.k,
+            "last_route": self.last_route,
+            "citations": self.citations,
+            "error": self.error,
+        }

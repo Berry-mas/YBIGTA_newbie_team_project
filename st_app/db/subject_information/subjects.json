@@ -1,0 +1,21 @@
+{
+  "AirPods Pro": {
+    "category": "earbuds",
+    "maker": "Apple",
+    "highlights": [
+      "Active Noise Cancellation with Transparency mode",
+      "Adaptive EQ, H2 chip",
+      "MagSafe charging case"
+    ]
+  },
+  "소년이 온다": {
+    "category": "book",
+    "author": "한강",
+    "highlights": [
+      "5.18 광주민주화항쟁을 소설 형식으로 다룬 작품",
+      "담담하지만 강렬한 서술",
+      "기억과 증언, 애도의 정서"
+    ]
+  }
+}
+
