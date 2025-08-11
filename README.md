@@ -429,3 +429,146 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 ![alt text](aws/delete_4.png)
 ![alt text](aws/put_5_update.png)
 ![alt text](aws/post_6_preprocess.png)
+
+---
+
+## Streamlit Cloud 데모 작동 화면
+
+#### 링크 : https://ybigtanewbieteamproject-g3d4bdbermzuvxfhncvwbo.streamlit.app/
+
+![alt text](st_app/streamlit-example.png)
+
+## **State Class 구현 방식**
+
+### 📋 ChatState 클래스 설계
+
+이 프로젝트에서는 대화 흐름의 모든 상태 정보를 관리하기 위해 `st_app/utils/state.py`에 `ChatState` 클래스를 구현했습니다.
+
+#### 🏗️ **구현 특징**
+
+- **Pydantic 기반**: `TypedDict`와 `dataclass`를 활용하여 타입 안정성과 데이터 검증을 보장
+- **통합 상태 관리**: 대화 메시지, 라우팅 정보, RAG 결과, 메모리 시스템을 단일 객체로 관리
+- **확장 가능성**: 새로운 필드 추가가 용이한 구조 설계
+
+#### 📊 **핵심 필드 구성**
+
+| 필드명              | 타입                       | 설명                                              |
+| ------------------- | -------------------------- | ------------------------------------------------- |
+| `messages`          | `List[Dict[str, str]]`     | 사용자/어시스턴트 대화 메시지 목록                |
+| `current_node`      | `str`                      | 현재 활성화된 노드 (chat/subject_info/rag_review) |
+| `last_route`        | `Optional[str]`            | 마지막으로 라우팅된 노드명                        |
+| `k`                 | `int`                      | RAG 검색 시 반환할 문서 개수 (기본값: 4)          |
+| `citations`         | `List[Dict[str, Any]]`     | RAG에서 참조한 문서 정보                          |
+| `error`             | `Optional[Dict[str, Any]]` | 오류 정보                                         |
+| `short_term_memory` | `List[MemoryItem]`         | 최근 대화 메모리 (최대 40개)                      |
+| `long_term_memory`  | `List[MemoryItem]`         | 중요 정보 장기 메모리 (최대 100개)                |
+
+#### 🧠 **메모리 시스템**
+
+```python
+@dataclass
+class MemoryItem:
+    content: str           # 메모리 내용
+    timestamp: float       # 생성 시간
+    importance: float      # 중요도 (0.0 ~ 1.0)
+    context: Dict[str, Any] # 컨텍스트 정보
+```
+
+- **단기 메모리**: 최근 40개의 대화 내용을 임시 저장
+- **장기 메모리**: 중요도 0.7 이상의 정보를 30일간 보관
+- **자동 정리**: 메모리 크기 제한 및 오래된 데이터 자동 삭제
+
+#### 🔄 **상태 관리 메서드**
+
+- `add_message()`: 대화 메시지 추가 및 메모리 업데이트
+- `add_intent()`: 의도 분석 결과 저장
+- `get_conversation_history()`: 최근 대화 히스토리 반환
+- `get_memory_context()`: 중요 메모리 정보 반환
+- `reset()`: 상태 초기화 (메모리는 유지)
+
+---
+
+## **조건부 라우팅 구현 방식**
+
+### 🎯 LLM 기반 지능형 라우팅
+
+이 프로젝트는 LangGraph의 `StateGraph`를 활용하여 **LLM 기반 조건부 라우팅**을 구현했습니다.
+
+#### 🏛️ **아키텍처 구조**
+
+```
+START → router → [조건부 분기] → chat/subject_info/rag_review → END
+                ↑
+            _route_selector
+```
+
+#### 🤖 **라우팅 로직**
+
+**1. LLM 의도 분석**
+
+```python
+def _decide_route(question: str) -> str:
+    llm = get_llm()  # Upstage Solar 모델 사용
+    prompt = """
+    너는 라우팅 판단자다. 사용자의 질문이 어떤 처리로 가야 할지 '정확히 하나'만 선택해라.
+    가능한 선택지: chat | subject_info | rag_review
+
+    규칙:
+    - 대상의 기본 정보/스펙/설명/저자/제조사 등을 물으면 subject_info
+    - 리뷰/후기/요약/인용 등 사용자 반응을 근거로 한 답변이 필요하면 rag_review
+    - 그 외 일반 대화는 chat
+    """
+    out = llm.invoke(prompt)
+    return decision
+```
+
+**2. 라우팅 규칙**
+
+- **`subject_info`**: 제품/작품/인물의 기본 정보 요청
+- **`rag_review`**: 리뷰/후기 기반 답변 요청
+- **`chat`**: 일반 대화 및 기타 질문
+
+#### 🛡️ **가드레일 (안전장치)**
+
+**1. LLM 출력 정규화**
+
+```python
+decision = decision_raw.lower().replace(" ", "").replace("\n", "").strip('\"\'')
+```
+
+**2. 키워드 기반 폴백**
+
+```python
+# LLM이 실패할 경우 키워드 매칭으로 폴백
+if any(kw in q for kw in ["리뷰", "후기", "요약", "인용"]):
+    return "rag_review"
+if any(kw in q for kw in ["정보", "스펙", "특징", "저자", "작가"]):
+    return "subject_info"
+```
+
+**3. 기본값 처리**
+
+- LLM이 명확한 의도를 판별하지 못하거나 허용되지 않는 값을 반환할 경우
+- 무조건 `chat` 노드로 폴백하여 안전한 대화 진행
+
+#### 🔍 **디버깅 및 모니터링**
+
+```python
+print(f"🔍 라우팅 디버그 - 질문: {question}")
+print(f"🔍 라우팅 디버그 - LLM 결정: {decision_raw} -> {decision}")
+print(f"🔍 라우팅 디버그 - {decision}로 분기")
+```
+
+#### 📈 **라우팅 성능**
+
+- **응답 시간**: LLM 호출 + 키워드 매칭으로 빠른 분기
+- **정확도**: LLM 기반 의도 분석 + 키워드 폴백으로 높은 정확도
+- **안정성**: 다중 가드레일로 시스템 안정성 보장
+
+#### 🎨 **사용자 경험**
+
+- **자동 분기**: 사용자가 의도를 명시하지 않아도 자동으로 적절한 노드로 라우팅
+- **일관성**: 동일한 의도의 질문은 항상 같은 노드로 처리
+- **투명성**: 현재 활성 노드가 UI에 표시되어 사용자가 현재 상태를 인지 가능
+
+---

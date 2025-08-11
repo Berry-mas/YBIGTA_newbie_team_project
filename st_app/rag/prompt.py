@@ -10,3 +10,4 @@ def build_review_prompt(question: str, context: str) -> str:
         f"QUESTION:\n{question}\n\n"
         f"CONTEXT:\n{context}\n"
     )
+
