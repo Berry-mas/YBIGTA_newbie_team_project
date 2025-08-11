@@ -438,8 +438,6 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 
 ![alt text](st_app/streamlit-example.png)
 
----
-
 ## **State Class 구현 방식**
 
 ### 📋 ChatState 클래스 설계
