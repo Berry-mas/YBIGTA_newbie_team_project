@@ -9,7 +9,6 @@ def build_review_prompt(question: str, context: str) -> str:
         "- 핵심 요점 위주로 5문장 이내로 요약하세요.\n\n"
         f"QUESTION:\n{question}\n\n"
         f"CONTEXT:\n{context}\n\n"
-        "마지막 줄에 '출처: [DOC i, ...]' 형식으로 문서 번호를 기재하세요."
     )
 
 
