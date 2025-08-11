@@ -492,7 +492,7 @@ class MemoryItem:
 
 ### 🎯 LLM 기반 지능형 라우팅
 
-이 프로젝트는 LangGraph의 `StateGraph`를 활용하여 **LLM 기반 조건부 라우팅**을 구현했습니다.
+이 프로젝트에서는 LangGraph의 `StateGraph`를 활용하여 'LLM 기반 조건부 라우팅'을 구현했습니다.
 
 #### 🏛️ **아키텍처 구조**
 
@@ -521,14 +521,13 @@ def _decide_route(question: str) -> str:
     out = llm.invoke(prompt)
     return decision
 ```
-LLM에게 질문을 기반으로 응답을 요청해 라우팅 판단을 요구한다. 
+LLM에게 질문을 기반으로 응답을 요청해 라우팅 판단을 요구 
 
 **2. 라우팅 규칙**
 
 - **`subject_info`**: 제품/작품/인물의 기본 정보 요청
 - **`rag_review`**: 리뷰/후기 기반 답변 요청
-- **`chat`**: 일반 대화 및 기타 질문
-로 구분한다. 
+- **`chat`**: 일반 대화 및 기타 질문 
 
 #### 🛡️ **안정적인 LLM 기반 라우팅을 위한 안전장치**
 
