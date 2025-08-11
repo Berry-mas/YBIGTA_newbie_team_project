@@ -317,10 +317,11 @@ def main():
                             
                             # citations 표시 (RAG 결과인 경우)
                             citations = out.get("citations", [])
-                            if citations:
-                                with st.expander("📚 참고 자료", expanded=False):
-                                    for i, citation in enumerate(citations, 1):
-                                        st.write(f"{i}. {citation.get('content', '')[:100]}...")
+                            # 참고문헌 표시 기능 삭제
+                            # if citations:
+                            #     with st.expander("📚 참고 자료", expanded=False):
+                            #         for i, citation in enumerate(citations, 1):
+                            #             st.write(f"{i}. {citation.get('content', '')[:100]}...")
                     
                     # 세션 메시지 업데이트
                     st.session_state.chat_state.messages = messages
