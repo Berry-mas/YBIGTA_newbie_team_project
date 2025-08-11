@@ -109,7 +109,7 @@ def main():
     with st.sidebar:
         st.title("🤖 챗봇 설정")
         
-        # API 키 입력
+        # API 키 입력 (로컬 개발용)
         api_key_input = st.text_input(
             "Upstage API Key", 
             type="password",
@@ -123,6 +123,12 @@ def main():
                 base_url="https://api.upstage.ai/v1/solar"
             )
             st.success("API 키가 설정되었습니다!")
+        
+        # API 키 상태 표시 (주석처리 - 배포 시 사용)
+        # if st.session_state.api_client:
+        #     st.success("✅ API 키가 설정되어 있습니다!")
+        # else:
+        #     st.error("❌ API 키가 설정되지 않았습니다. 환경변수를 확인해주세요.")
         
         # 모드 선택
         st.subheader("🔧 모드 선택")
@@ -318,6 +324,11 @@ def main():
                     
                     # 세션 메시지 업데이트
                     st.session_state.chat_state.messages = messages
+                    
+                    # last_route 업데이트 (UI 동기화를 위해)
+                    if out.get("last_route"):
+                        st.session_state.chat_state.last_route = out["last_route"]
+                        print(f"🔍 UI 업데이트 - last_route: {out['last_route']}")
                     
                 except Exception as e:
                     st.error(f"오류가 발생했습니다: {str(e)}")
