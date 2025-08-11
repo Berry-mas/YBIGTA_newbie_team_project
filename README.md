@@ -560,3 +560,5 @@ print(f"🔍 라우팅 디버그 - {decision}로 분기")
 ```
 
 ---
+
+![alt text](st_app/ybigta_ai_agent_flow.png)
