@@ -28,7 +28,7 @@ class UpstageEmbedder:
             raise RuntimeError("UPSTAGE_API_KEY가 설정되지 않았습니다.")
         
         self.model = model_name or os.getenv("EMBEDDING_MODEL", "solar-1-mini-embedding")
-        self.base_url = "https://api.upstage.ai/v1"
+        self.base_url = "https://api.upstage.ai"
         self._dimension = None
 
     @property
@@ -45,7 +45,7 @@ class UpstageEmbedder:
         if not texts:
             return np.array([])
         
-        url = f"{self.base_url}/embeddings"
+        url = f"{self.base_url}/v1/embeddings"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
