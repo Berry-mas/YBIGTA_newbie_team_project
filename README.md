@@ -504,7 +504,7 @@ START → router → [조건부 분기] → chat/subject_info/rag_review → END
 
 #### 🤖 **라우팅 로직**
 
-**1. LLM 의도 분석**
+**1. LLM 의도 분석 프롬포트**
 
 ```python
 def _decide_route(question: str) -> str:
