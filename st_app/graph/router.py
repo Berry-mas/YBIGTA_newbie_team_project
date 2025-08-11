@@ -34,6 +34,8 @@ def _decide_route(question: str) -> str:
     - 한국어 지시 강화, 후처리로 한국어 키워드 보정.
     - 모호 시 질문 텍스트에 대한 휴리스틱 적용.
     """
+    print(f"🔍 라우팅 디버그 - 질문: {question}")
+    
     llm = get_llm()
     prompt = (
         "너는 라우팅 판단자다. 사용자의 질문이 어떤 처리로 가야 할지 '정확히 하나'만 선택해라.\n"
@@ -51,21 +53,30 @@ def _decide_route(question: str) -> str:
     decision = decision_raw.lower().replace(" ", "").replace("\n", "").replace("\t", "")
     decision = decision.strip('\"\'')
 
+    print(f"🔍 라우팅 디버그 - LLM 결정: {decision_raw} -> {decision}")
+
     subj_markers = ["subject_info", "subjectinfo", "subject", "정보", "스펙", "특징", "저자", "작가", "제조사", "소개", "설명"]
     review_markers = ["rag_review", "ragreview", "rag", "review", "리뷰", "후기", "요약", "인용"]
 
     if any(tok in decision for tok in subj_markers):
+        print(f"🔍 라우팅 디버그 - subject_info로 분기 (LLM)")
         return "subject_info"
     if any(tok in decision for tok in review_markers):
+        print(f"🔍 라우팅 디버그 - rag_review로 분기 (LLM)")
         return "rag_review"
     if decision in {"chat", "subject_info", "rag_review"}:
+        print(f"🔍 라우팅 디버그 - {decision}로 분기 (직접 매칭)")
         return decision
 
     q = (question or "").lower()
     if any(kw in q for kw in ["리뷰", "후기", "요약", "인용"]):
+        print(f"🔍 라우팅 디버그 - rag_review로 분기 (키워드)")
         return "rag_review"
     if any(kw in q for kw in ["정보", "스펙", "특징", "저자", "작가", "제조사", "설명", "가격"]):
+        print(f"🔍 라우팅 디버그 - subject_info로 분기 (키워드)")
         return "subject_info"
+    
+    print(f"🔍 라우팅 디버그 - chat로 분기 (기본값)")
     return "chat"
 
 
