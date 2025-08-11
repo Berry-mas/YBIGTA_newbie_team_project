@@ -1,0 +1,11 @@
+[server]
+# 파일 감시 비활성화 (inotify 제한 해결)
+fileWatcherType = "none"
+
+[client]
+# 캐싱 비활성화
+caching = false
+
+[browser]
+# 자동 브라우저 열기 비활성화
+gatherUsageStats = false

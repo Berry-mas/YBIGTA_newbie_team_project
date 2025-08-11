@@ -211,5 +211,13 @@ __marimo__/
 # macOS 시스템 파일
 .DS_Store
 
+# Streamlit 설정 (config.toml은 예외)
+# .streamlit 전체 무시
 .streamlit/
+
+# config.toml만 추적
+!.streamlit/config.toml
+
+# 모든 toml 무시 (위에서 예외 선언된 건 무시 안 함)
 *.toml
+!.streamlit/config.toml
