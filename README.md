@@ -442,7 +442,7 @@ python main.py -o ../../database --all을 터미널/Powershell에 입력해주�
 
 ### 📋 ChatState 클래스 설계
 
-이 프로젝트에서는 대화 흐름의 모든 상태 정보를 관리하기 위해 `st_app/utils/state.py`에 `ChatState` 클래스를 구현했습니다.
+이 프로젝트는 대화 흐름의 모든 상태 정보를 관리하기 위해 `st_app/utils/state.py`에 **ChatState** 클래스를 구현했습니다.
 
 #### 🏗️ **구현 특징**
 
@@ -492,7 +492,7 @@ class MemoryItem:
 
 ### 🎯 LLM 기반 지능형 라우팅
 
-이 프로젝트에서는 LangGraph의 `StateGraph`를 활용하여 'LLM 기반 조건부 라우팅'을 구현했습니다.
+이 프로젝트는 LangGraph의 `StateGraph`를 활용하여 **LLM 기반 조건부 라우팅**을 구현했습니다.
 
 #### 🏛️ **아키텍처 구조**
 
