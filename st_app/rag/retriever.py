@@ -23,29 +23,31 @@ def _load_review_texts(base_dir: str) -> List[RetrievedDocument]:
     """리뷰 텍스트 로드"""
     docs = []
     
-    # MongoDB에서 데이터 로드 시도
-    try:
-        from database.mongodb_connection import mongo_db
-        collections = ["yes24_processed", "aladin_processed", "kyobo_processed"]
-        
-        for collection_name in collections:
-            if collection_name in mongo_db.list_collection_names():
-                collection = mongo_db[collection_name]
-                cursor = collection.find({}, {"text": 1, "score": 1, "date": 1, "site": 1})
-                
-                for doc in cursor:
-                    text = doc.get("text", "")
-                    if text and len(text.strip()) > 10:  # 의미있는 텍스트만
-                        metadata = {
-                            "source": collection_name,
-                            "score": doc.get("score", 0),
-                            "date": doc.get("date"),
-                            "site": doc.get("site", collection_name.split("_")[0])
-                        }
-                        docs.append(RetrievedDocument(text, metadata, 0.0))
-                        
-    except Exception as e:
-        print(f"MongoDB 로드 실패: {e}")
+    # MongoDB에서 데이터 로드 시도 (배포 환경에서는 비활성화)
+    # try:
+    #     from database.mongodb_connection import mongo_db
+    #     collections = ["yes24_processed", "aladin_processed", "kyobo_processed"]
+    #     
+    #     for collection_name in collections:
+    #         if collection_name in mongo_db.list_collection_names():
+    #             collection = mongo_db[collection_name]
+    #             cursor = collection.find({}, {"text": 1, "score": 1, "date": 1, "site": 1})
+    #             
+    #             for doc in cursor:
+    #                 text = doc.get("text", "")
+    #                 if text and len(text.strip()) > 10:  # 의미있는 텍스트만
+    #                     metadata = {
+    #                         "source": collection_name,
+    #                         "score": doc.get("score", 0),
+    #                         "date": doc.get("date"),
+    #                         "site": doc.get("site", collection_name.split("_")[0])
+    #                     }
+    #                     docs.append(RetrievedDocument(text, metadata, 0.0))
+    #                     
+    # except Exception as e:
+    #     print(f"MongoDB 로드 실패: {e}")
+    
+    print("MongoDB 연결 비활성화 - CSV 파일 사용")
     
     # 로컬 파일에서 데이터 로드 시도
     if not docs:
