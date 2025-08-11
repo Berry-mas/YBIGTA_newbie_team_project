@@ -109,26 +109,26 @@ def main():
     with st.sidebar:
         st.title("🤖 챗봇 설정")
         
-        # API 키 입력 (로컬 개발용)
-        api_key_input = st.text_input(
-            "Upstage API Key", 
-            type="password",
-            placeholder="API 키를 입력하세요 (선택사항)"
-        )
+        # API 키 입력 (로컬 개발용 - 주석처리)
+        # api_key_input = st.text_input(
+        #     "Upstage API Key", 
+        #     type="password",
+        #     placeholder="API 키를 입력하세요 (선택사항)"
+        # )
         
-        if api_key_input and api_key_input != st.session_state.get("current_api_key"):
-            st.session_state.current_api_key = api_key_input
-            st.session_state.api_client = OpenAI(
-                api_key=api_key_input,
-                base_url="https://api.upstage.ai/v1/solar"
-            )
-            st.success("API 키가 설정되었습니다!")
+        # if api_key_input and api_key_input != st.session_state.get("current_api_key"):
+        #     st.session_state.current_api_key = api_key_input
+        #     st.session_state.api_client = OpenAI(
+        #         api_key=api_key_input,
+        #         base_url="https://api.upstage.ai/v1/solar"
+        #     )
+        #     st.success("API 키가 설정되었습니다!")
         
-        # API 키 상태 표시 (주석처리 - 배포 시 사용)
-        # if st.session_state.api_client:
-        #     st.success("✅ API 키가 설정되어 있습니다!")
-        # else:
-        #     st.error("❌ API 키가 설정되지 않았습니다. 환경변수를 확인해주세요.")
+        # API 키 상태 표시 (배포 시 사용)
+        if st.session_state.api_client:
+            st.success("✅ API 키가 설정되어 있습니다!")
+        else:
+            st.error("❌ API 키가 설정되지 않았습니다. 환경변수를 확인해주세요.")
         
         # 모드 선택
         st.subheader("🔧 모드 선택")
@@ -343,6 +343,14 @@ def main():
         st.markdown("💻 **개발 정보**: 간단 모드 - 기본 책 정보 질의")
     else:
         st.markdown("💻 **개발 정보**: 고급 모드 - 자동 라우팅 (Chat/Subject/RAG)")
+        # 현재 노드 정보 표시
+        current_node = st.session_state.chat_state.last_route or "chat"
+        node_display_names = {
+            "chat": "💬 Chat Node",
+            "subject_info": "📚 Subject Info", 
+            "rag_review": "🔍 RAG Review"
+        }
+        st.markdown(f"🎯 **현재 노드**: {node_display_names.get(current_node, current_node)}")
     st.markdown("📊 **데이터 출처**: yes24, 알라딘, 교보문고 리뷰 데이터")
 
 
