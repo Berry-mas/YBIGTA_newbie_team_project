@@ -555,4 +555,4 @@ if any(kw in q for kw in ["정보", "스펙", "특징", "저자", "작가"]):
 ---
 ## **draw.io 전체 로직**
 
-![alt text](st_app/ybigta_ai_agent_flow.png)
+![alt text](st_app/ybigta_rag_agent_flow.png)
